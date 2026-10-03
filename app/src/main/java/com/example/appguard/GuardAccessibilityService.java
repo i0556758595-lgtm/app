@@ -1,5 +1,5 @@
 package com.example.appguard;
-import android.accessibilityservice.AccessibilityService; import android.graphics.Color; import android.graphics.PixelFormat; import android.view.Gravity; import android.view.WindowManager; import android.view.accessibility.AccessibilityEvent; import android.widget.TextView; import java.util.*;
+import android.accessibilityservice.AccessibilityService; import android.content.Intent; import android.graphics.Color; import android.graphics.PixelFormat; import android.view.Gravity; import android.view.WindowManager; import android.view.accessibility.AccessibilityEvent; import android.widget.TextView; import java.util.*;
 public class GuardAccessibilityService extends AccessibilityService {
  private WindowManager wm; private TextView blocker; private final Set<String> blocked=new HashSet<>(Arrays.asList("com.android.packageinstaller","com.google.android.packageinstaller","com.android.permissioncontroller","com.android.settings"));
  @Override protected void onServiceConnected(){super.onServiceConnected();wm=(WindowManager)getSystemService(WINDOW_SERVICE);}
