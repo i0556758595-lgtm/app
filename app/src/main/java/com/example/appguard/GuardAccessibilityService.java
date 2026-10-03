@@ -1,0 +1,10 @@
+package com.example.appguard;
+import android.accessibilityservice.AccessibilityService; import android.graphics.Color; import android.graphics.PixelFormat; import android.view.Gravity; import android.view.WindowManager; import android.view.accessibility.AccessibilityEvent; import android.widget.TextView; import java.util.*;
+public class GuardAccessibilityService extends AccessibilityService {
+ private WindowManager wm; private TextView blocker; private final Set<String> blocked=new HashSet<>(Arrays.asList("com.android.packageinstaller","com.google.android.packageinstaller","com.android.permissioncontroller","com.android.settings"));
+ @Override protected void onServiceConnected(){super.onServiceConnected();wm=(WindowManager)getSystemService(WINDOW_SERVICE);}
+ @Override public void onAccessibilityEvent(AccessibilityEvent e){if(e==null)return;int t=e.getEventType();if(t!=AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED&&t!=AccessibilityEvent.TYPE_WINDOWS_CHANGED)return;boolean en=getSharedPreferences(MainActivity.PREFS,0).getBoolean(MainActivity.ENABLED,false);if(!en){remove();return;}CharSequence p=e.getPackageName();if(p==null)return;String pkg=p.toString();if(blocked.contains(pkg)&&!pkg.equals(getPackageName()))show();else if(!pkg.equals(getPackageName()))remove();}
+ private void show(){if(blocker!=null||wm==null)return;TextView v=new TextView(this);v.setText("הפעולה חסומה\\n\\nגישה למסך זה חסומה במצב ההגנה.");v.setTextSize(24);v.setTextColor(Color.WHITE);v.setGravity(Gravity.CENTER);v.setBackgroundColor(Color.rgb(20,20,20));v.setClickable(true);v.setFocusable(true);WindowManager.LayoutParams lp=new WindowManager.LayoutParams(-1,-1,WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN|WindowManager.LayoutParams.FLAG_FULLSCREEN,PixelFormat.TRANSLUCENT);try{wm.addView(v,lp);blocker=v;}catch(RuntimeException ignored){}}
+ private void remove(){if(blocker==null||wm==null)return;try{wm.removeView(blocker);}catch(RuntimeException ignored){}blocker=null;}
+ @Override public void onInterrupt(){remove();}@Override public boolean onUnbind(Intent i){remove();return super.onUnbind(i);}
+}
